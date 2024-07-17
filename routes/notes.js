@@ -11,14 +11,19 @@ router.get('/', async (req, res) => {
   }
 });
 
+const express = require('express');
+const router = express.Router();
+const Note = require('../models/Note');
+
 router.post('/', async (req, res) => {
   try {
     const { text } = req.body;
     const newNote = new Note({
       text,
-      user: req.user.id  // Assuming the auth middleware adds user info to req.user
+      user: req.user.id
     });
     const savedNote = await newNote.save();
+    console.log('Note saved:', savedNote); // Add this line for debugging
     res.status(201).json(savedNote);
   } catch (err) {
     console.error("Error in POST /api/notes:", err);
