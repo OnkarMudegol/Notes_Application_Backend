@@ -12,16 +12,17 @@ router.get('/', async (req, res) => {
 });
 
 router.post('/', async (req, res) => {
-  const note = new Note({
-    text: req.body.text,
-    user: req.user._id
-  });
-
   try {
-    const newNote = await note.save();
-    res.status(201).json(newNote);
+    const { text } = req.body;
+    const newNote = new Note({
+      text,
+      user: req.user.id  // Assuming the auth middleware adds user info to req.user
+    });
+    const savedNote = await newNote.save();
+    res.status(201).json(savedNote);
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    console.error("Error in POST /api/notes:", err);
+    res.status(500).json({ message: "Error adding note", error: err.message });
   }
 });
 
