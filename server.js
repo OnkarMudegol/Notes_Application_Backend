@@ -6,7 +6,7 @@ require("dotenv").config();
 
 const authRoutes = require("./routes/auth");
 const noteRoutes = require("./routes/notes");
-const authMiddleware = require("./middleware/auth"); // Update this line
+const authMiddleware = require("./middleware/auth");
 
 const app = express();
 
@@ -20,10 +20,6 @@ mongoose
   .connect(process.env.MONGODB_URI)
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => console.error("MongoDB connection error:", err));
-
-app.get("/health", (req, res) => {
-  res.status(200).send("OK");
-});
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
