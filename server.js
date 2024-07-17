@@ -6,14 +6,12 @@ require("dotenv").config();
 
 const authRoutes = require("./routes/auth");
 const noteRoutes = require("./routes/notes");
+const authMiddleware = require("./middleware/auth"); // Update this line
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
-
-// Assuming you have implemented authentication middleware
-const authMiddleware = require("./middleware/auth");
 
 app.use("/api/auth", authRoutes);
 app.use("/api/notes", authMiddleware, noteRoutes);
