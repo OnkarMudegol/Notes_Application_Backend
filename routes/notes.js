@@ -12,7 +12,7 @@ router.get('/', async (req, res) => {
 });
 
 const express = require('express');
-const router = express.Router();
+const Router = express.Router();
 const Note = require('../models/Note');
 
 router.post('/', async (req, res) => {
