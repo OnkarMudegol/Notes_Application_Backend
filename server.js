@@ -12,8 +12,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Assuming you have implemented authentication middleware
+const authMiddleware = require("./middleware/auth");
+
 app.use("/api/auth", authRoutes);
-app.use("/api/notes", noteRoutes);
+app.use("/api/notes", authMiddleware, noteRoutes);
 
 mongoose
   .connect(process.env.MONGODB_URI)

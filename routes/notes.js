@@ -1,72 +1,56 @@
-// routes/notes.js
 const express = require('express');
-const jwt = require('jsonwebtoken');
+const router = express.Router();
 const Note = require('../models/Note');
 
-const router = express.Router();
+router.get('/', async (req, res) => {
+  try {
+    const notes = await Note.find({ user: req.user._id }).sort({ date: -1 });
+    res.json(notes);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
 
-// Middleware to verify JWT token
-const authMiddleware = (req, res, next) => {
-    const token = req.header('Authorization')?.replace('Bearer ', '');
-    if (!token) {
-      return res.status(401).json({ message: 'No token, authorization denied' });
-    }
-    try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      req.userId = decoded.userId;
-      next();
-    } catch (error) {
-      res.status(401).json({ message: 'Token is not valid' });
-    }
-  };
-  
-  router.get('/', authMiddleware, async (req, res) => {
-    try {
-      const notes = await Note.find({ user: req.userId });
-      res.json(notes);
-    } catch (error) {
-      res.status(500).json({ message: 'Error fetching notes' });
-    }
+router.post('/', async (req, res) => {
+  const note = new Note({
+    text: req.body.text,
+    user: req.user._id
   });
-  
-  router.post('/', authMiddleware, async (req, res) => {
-    try {
-      const { text, color } = req.body;
-      const newNote = new Note({ user: req.userId, text, color });
-      await newNote.save();
-      res.status(201).json(newNote);
-    } catch (error) {
-      res.status(500).json({ message: 'Error creating note' });
+
+  try {
+    const newNote = await note.save();
+    res.status(201).json(newNote);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
+router.put('/:id', async (req, res) => {
+  try {
+    const updatedNote = await Note.findOneAndUpdate(
+      { _id: req.params.id, user: req.user._id },
+      { text: req.body.text },
+      { new: true }
+    );
+    if (!updatedNote) {
+      return res.status(404).json({ message: 'Note not found' });
     }
-  });
-  
-  router.put('/:id', authMiddleware, async (req, res) => {
-    try {
-      const { text } = req.body;
-      const note = await Note.findOneAndUpdate(
-        { _id: req.params.id, user: req.userId },
-        { text },
-        { new: true }
-      );
-      if (!note) {
-        return res.status(404).json({ message: 'Note not found' });
-      }
-      res.json(note);
-    } catch (error) {
-      res.status(500).json({ message: 'Error updating note' });
+    res.json(updatedNote);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
+router.delete('/:id', async (req, res) => {
+  try {
+    const deletedNote = await Note.findOneAndDelete({ _id: req.params.id, user: req.user._id });
+    if (!deletedNote) {
+      return res.status(404).json({ message: 'Note not found' });
     }
-  });
-  
-  router.delete('/:id', authMiddleware, async (req, res) => {
-    try {
-      const note = await Note.findOneAndDelete({ _id: req.params.id, user: req.userId });
-      if (!note) {
-        return res.status(404).json({ message: 'Note not found' });
-      }
-      res.json({ message: 'Note deleted successfully' });
-    } catch (error) {
-      res.status(500).json({ message: 'Error deleting note' });
-    }
-  });
-  
-  module.exports = router;
+    res.json({ message: 'Note deleted' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+module.exports = router;
