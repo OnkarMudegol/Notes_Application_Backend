@@ -11,10 +11,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-const express = require('express');
-const Router = express.Router();
-const Note = require('../models/Note');
-
 router.post('/', async (req, res) => {
   try {
     const { text } = req.body;
